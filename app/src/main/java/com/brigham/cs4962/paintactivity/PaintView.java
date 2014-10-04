@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,25 +16,37 @@ import android.view.View;
  */
 public class PaintView extends View {
 
-    public RectF getContentRect() {
-        return m_contentRect;
-    }
-
+    OnSplotchTouchListener m_onSplotchTouchListener = null;
+    OnSplotchReleaseListener m_onSplotchReleaseListener = null;
     private RectF m_contentRect;
     private int m_color = Color.CYAN;
     private float m_radius;
     private boolean m_active;
     private Path m_path;
-
     private float mLastTouchX, mLastTouchY, mPosX, mPosY;
+    private float m_posX, m_posY;
 
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-    public boolean isActive() { return m_active; }
+    public PaintView(Context context) {
+        super(context);
+        setMinimumWidth(100);
+        setMinimumHeight(100);
+        setPadding(0, 0, 0, 0);
+    }
+
+    public RectF getContentRect() {
+        return m_contentRect;
+    }
+
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
+    public boolean isActive() {
+        return m_active;
+    }
 
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~
     public void setActive(boolean m_active) {
         this.m_active = m_active;
-       // invalidate();
+        // invalidate();
 //        if(this.m_active) {
 //            this.setColor(Color.GREEN);
 //        } else {
@@ -54,44 +65,30 @@ public class PaintView extends View {
         invalidate();
     }
 
-    OnSplotchTouchListener m_onSplotchTouchListener = null;
-    OnSplotchReleaseListener m_onSplotchReleaseListener = null;
-
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~
     public OnSplotchTouchListener getOnSplotchTouchListener() {
         return m_onSplotchTouchListener;
     }
-    public OnSplotchReleaseListener getOnSplotchReleaseListener() { return m_onSplotchReleaseListener; }
 
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-    public interface OnSplotchTouchListener { public void onSplotchTouched(PaintView v); }
-    public interface OnSplotchReleaseListener { public void onSplotchReleased(PaintView v); }
-
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-    public void setOnSplotchTouchListener(OnSplotchTouchListener m_onSplotchTouchListener) { this.m_onSplotchTouchListener = m_onSplotchTouchListener; }
-    public void setOnSplotchReleaseListener(OnSplotchReleaseListener m_onSplotchReleaseListener) { this.m_onSplotchReleaseListener = m_onSplotchReleaseListener; }
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-
-
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-
-
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-
-
-
-
-
-
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-    public PaintView(Context context) {
-        super(context);
-        setMinimumWidth(100);
-        setMinimumHeight(100);
-        setPadding(0, 0, 0, 0);
+    public void setOnSplotchTouchListener(OnSplotchTouchListener m_onSplotchTouchListener) {
+        this.m_onSplotchTouchListener = m_onSplotchTouchListener;
     }
 
-    private float m_posX, m_posY;
+    public OnSplotchReleaseListener getOnSplotchReleaseListener() {
+        return m_onSplotchReleaseListener;
+    }
+
+    public void setOnSplotchReleaseListener(OnSplotchReleaseListener m_onSplotchReleaseListener) {
+        this.m_onSplotchReleaseListener = m_onSplotchReleaseListener;
+    }
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
+
+
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
+
+
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
 
     public boolean isOverSplotch(RectF contentRect, float xPos2, float yPos2) {
 
@@ -130,7 +127,7 @@ public class PaintView extends View {
 
         isOverSplotch(m_contentRect, getX(), getY());
 
-        switch(action) {
+        switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mLastTouchX = x;
                 mLastTouchY = y;
@@ -207,10 +204,10 @@ public class PaintView extends View {
         linePaint.setColor(m_color);
 
         // no reason to create new random splotches everytime it invalidates
-        if(m_path != null) {
+        if (m_path != null) {
             canvas.drawPath(m_path, linePaint);
 
-            if(isActive()) {
+            if (isActive()) {
                 drawBorder(canvas);
             }
 
@@ -261,17 +258,15 @@ public class PaintView extends View {
 
             if (pointIndex == 0) {
                 m_path.moveTo(point.x, point.y);
-            }
-            else {
+            } else {
                 m_path.cubicTo(control1.x, control1.y, control2.x, control2.y, point.x, point.y);
             }
         }
 
         canvas.drawPath(m_path, linePaint);
-        if(isActive()) {
+        if (isActive()) {
             drawBorder(canvas);
         }
-
 
 
     }
@@ -287,27 +282,27 @@ public class PaintView extends View {
         int width = getSuggestedMinimumWidth();//.MAX_VALUE;
         int height = getSuggestedMinimumHeight();//.MAX_VALUE;
 
-        if(widthMode == MeasureSpec.AT_MOST) {
+        if (widthMode == MeasureSpec.AT_MOST) {
             width = widthSpec;
         }
-        if(heightMode == MeasureSpec.AT_MOST) {
+        if (heightMode == MeasureSpec.AT_MOST) {
             height = heightSpec;
         }
 
-        if(widthMode == MeasureSpec.EXACTLY) {
+        if (widthMode == MeasureSpec.EXACTLY) {
             width = widthSpec;
             height = width;
         }
-        if(heightMode == MeasureSpec.EXACTLY) {
+        if (heightMode == MeasureSpec.EXACTLY) {
             height = heightSpec;
             width = height;
         }
 
         // TODO: respect padding!
-        if(width > height && widthMode != MeasureSpec.EXACTLY) {
+        if (width > height && widthMode != MeasureSpec.EXACTLY) {
             width = height;
         }
-        if(height > width && heightMode != MeasureSpec.EXACTLY) {
+        if (height > width && heightMode != MeasureSpec.EXACTLY) {
             height = width;
         }
 
@@ -318,5 +313,14 @@ public class PaintView extends View {
         setMeasuredDimension(
                 resolveSizeAndState(width, widthMeasureSpec, width < getSuggestedMinimumWidth() ? MEASURED_STATE_TOO_SMALL : 0),
                 resolveSizeAndState(height, heightMeasureSpec, height < getSuggestedMinimumHeight() ? MEASURED_STATE_TOO_SMALL : 0));
+    }
+
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
+    public interface OnSplotchTouchListener {
+        public void onSplotchTouched(PaintView v);
+    }
+
+    public interface OnSplotchReleaseListener {
+        public void onSplotchReleased(PaintView v);
     }
 }

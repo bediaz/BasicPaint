@@ -4,5 +4,8 @@
     <string name="app_name">PaintActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_base">BaseActivity</string>
+    <string name="title_activity_watch">WatchActivity</string>
+    <string name="title_activity_palette">PaletteActivity</string>
 
 </resources>

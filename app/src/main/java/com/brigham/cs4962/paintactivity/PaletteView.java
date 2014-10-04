@@ -26,13 +26,6 @@ public class PaletteView extends ViewGroup {
     OnColorChangedListener m_OnColorChangedListener = null;
     OnAddNewColorListener m_OnAddNewColorListener = null;
 
-    public OnColorChangedListener getOnSplotchTouchListener() { return m_OnColorChangedListener; }
-    public OnColorChangedListener getOnColorChangedListener() { return m_OnColorChangedListener; }
-    public OnAddNewColorListener getOnAddNewColorListener() { return m_OnAddNewColorListener; }
-
-    public interface OnColorChangedListener { public void onColorChanged(int newColor); }
-    public interface OnAddNewColorListener { public void onAddNewColor(int newColor); }
-
     public PaletteView(Context context) {
         super(context);
         m_color = Color.rgb(205, 133, 63); // palette color (brown)
@@ -49,6 +42,28 @@ public class PaletteView extends ViewGroup {
                 Color.parseColor("#A52A2A"), // brown
                 Color.WHITE,
                 Color.BLACK));
+    }
+
+    public OnColorChangedListener getOnSplotchTouchListener() {
+        return m_OnColorChangedListener;
+    }
+
+    public OnColorChangedListener getOnColorChangedListener() {
+        return m_OnColorChangedListener;
+    }
+
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
+    public void setOnColorChangedListener(OnColorChangedListener m_onColorChangedListener) {
+        this.m_OnColorChangedListener = m_onColorChangedListener;
+    }
+
+    public OnAddNewColorListener getOnAddNewColorListener() {
+        return m_OnAddNewColorListener;
+    }
+
+    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
+    public void setOnAddNewColorListener(OnAddNewColorListener m_OnAddNewColorListener) {
+        this.m_OnAddNewColorListener = m_OnAddNewColorListener;
     }
 
     public int blendColor(int c1, int c2) {
@@ -86,17 +101,6 @@ public class PaletteView extends ViewGroup {
     private void removeColor() {
         this.setVisibility(GONE);
         invalidate();
-    }
-
-
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-    public void setOnColorChangedListener(OnColorChangedListener m_onColorChangedListener) {
-        this.m_OnColorChangedListener = m_onColorChangedListener;
-    }
-
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
-    public void setOnAddNewColorListener(OnAddNewColorListener m_OnAddNewColorListener) {
-        this.m_OnAddNewColorListener = m_OnAddNewColorListener;
     }
 
     @Override
@@ -241,5 +245,13 @@ public class PaletteView extends ViewGroup {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         return super.onTouchEvent(event);
+    }
+
+    public interface OnColorChangedListener {
+        public void onColorChanged(int newColor);
+    }
+
+    public interface OnAddNewColorListener {
+        public void onAddNewColor(int newColor);
     }
 }
