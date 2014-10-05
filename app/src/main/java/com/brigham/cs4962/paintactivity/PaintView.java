@@ -16,6 +16,8 @@ import android.view.View;
  */
 public class PaintView extends View {
 
+    public static final String PREFS = "PaintActivity";
+
     OnSplotchTouchListener m_onSplotchTouchListener = null;
     OnSplotchReleaseListener m_onSplotchReleaseListener = null;
     private RectF m_contentRect;
@@ -46,12 +48,6 @@ public class PaintView extends View {
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~
     public void setActive(boolean m_active) {
         this.m_active = m_active;
-        // invalidate();
-//        if(this.m_active) {
-//            this.setColor(Color.GREEN);
-//        } else {
-//            this.setColor(Color.CYAN);
-//        }
     }
 
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~

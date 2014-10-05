@@ -5,23 +5,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by Brigham on 9/21/2014.
  */
 public class PaintAreaView extends View implements OnTouchListener {
 
+    private final String TAG = "PaintAreaView";
     Path m_paths;
     Path m_currentPath;
     Paint m_linePaint;
@@ -29,104 +26,60 @@ public class PaintAreaView extends View implements OnTouchListener {
     List<Float> x_Points;
     List<Float> y_Points;
 
-    int m_strokeColor;
+   // int m_strokeColor;
 
     int m_viewWidth, m_viewHeight;
-
-    //ArrayList<PointF> m_currentPointsF; // stores points before converting to floating point array
 
     public ArrayList<DrawElement> getDrawElements() {
         return drawElements;
     }
 
     public void setDrawElements(ArrayList<DrawElement> drawElements) {
-        this.drawElements = drawElements;
+        if(drawElements != null) { this.drawElements = drawElements; }
     }
 
-    //    ArrayList<Float[]> m_savedPointsF; // passes this to bundle for savedInstance
-  //  ArrayList<Integer> m_savedColors; // passes this up to bundle for savedInstance
     ArrayList<DrawElement> drawElements;
 
     public PaintAreaView(Context context) {
         super(context);
         setFocusable(true);
         setFocusableInTouchMode(true);
-        m_linePaint = createPaintStyle();
+        m_linePaint = defaultPaintStyle();
         m_paths = new Path();
         x_Points = new ArrayList<Float>();
         y_Points = new ArrayList<Float>();
 
-        //m_currentPointsF = new ArrayList<PointF>();
-//        m_savedPointsF = new ArrayList<Float[]>();
-//        m_savedColors = new ArrayList<Integer>();
         m_currentPath = new Path();
         drawElements = new ArrayList<DrawElement>();
-
-        setStrokeColor(Color.BLACK);
 
         setOnTouchListener(this);
     }
 
-//    public ArrayList<Integer> getStrokeColors() {
-//        ArrayList<Integer> colors = new ArrayList<Integer>();
-//        for (DrawElement element : drawElements) {
-//            colors.add(element.getColor());
-//        }
-//
-//        return colors;
-//    }
-
-//    public ArrayList<Float[]> getPoints() {
-//        return m_savedPointsF;
-//    }
-
     public void setStrokeColor(int newColor) {
-        this.m_strokeColor = newColor;
+        // sanity check since this can get called from other classes
+        if(this.m_linePaint == null) {
+            this.m_linePaint = defaultPaintStyle();
+        }
+
+        this.m_linePaint.setColor(newColor);
     }
-
-//    public void restorePointsAndColors(ArrayList<Float[]> savedPoints, ArrayList<Integer> savedColors) {
-//        // save the arrays until ready to convert to paths
-//        this.m_savedPointsF = savedPoints;
-//        this.m_savedColors = savedColors;
-//    }
-
-    // converts the ArrayList of floating point arrays into Paths. Each floating point array is a new path
-//    private void pathColorArraysToMap() {
-//
-//        for (int index = 0; index < m_savedPointsF.size(); index++) {
-//            Float[] f = m_savedPointsF.get(index);
-//            Path path = new Path();
-//
-//            for (int floatArrayIndex = 0; floatArrayIndex < f.length - 1; floatArrayIndex += 2) {
-//                float x = f[floatArrayIndex];
-//                x *= m_viewWidth;
-//                float y = f[floatArrayIndex + 1];
-//                y *= m_viewHeight;
-//                if (floatArrayIndex == 0) {
-//                    path.moveTo(x, y);
-//                } else {
-//                    path.lineTo(x, y);
-//                }
-//            }
-//            m_pathAndColorMap.put(path, m_savedColors.get(index));
-//        }
-//
-//        invalidate(); // might be redundant call here
-//    }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        Log.i(TAG, "onSizeChanged, width=" + w + ",height=" + h);
 
         // get the width, height
-        m_viewWidth = w;
+        m_viewWidth = this.getMeasuredWidth();
         m_viewHeight = h;
+        invalidate();
     }
 
-    private Paint createPaintStyle() {
+    private Paint defaultPaintStyle() {
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(5);
+        paint.setColor(Color.BLACK);
         return paint;
     }
 
@@ -145,7 +98,7 @@ public class PaintAreaView extends View implements OnTouchListener {
         }
 
         // draw current line that hasn't been added to DrawElements yet.
-        m_linePaint.setColor(this.m_strokeColor);
+        //m_linePaint.setColor(this.m_strokeColor);
         canvas.drawPath(m_currentPath, m_linePaint);
 
         canvas.restore();
@@ -168,22 +121,9 @@ public class PaintAreaView extends View implements OnTouchListener {
 
         switch (action) {
             case MotionEvent.ACTION_UP: {
-                drawElements.add(new DrawElement(x_Points, y_Points, this.m_strokeColor));
-//                //m_pathAndColorMap.put(m_currentPath, this.m_strokeColor);
-//
-//                // convert the PointF array to floating point array
-//                Float[] f = new Float[m_currentPointsF.size() * 2];
-//                int floatArrayIdx = 0;
-//                for (PointF point : m_currentPointsF) {
-//                    f[floatArrayIdx] = point.x / m_viewWidth; // scale to [0.0 -> 1.0]
-//                    f[floatArrayIdx + 1] = point.y / m_viewHeight; // scale to [0.0 -> 1.0]
-//                    floatArrayIdx += 2;
-//                }
-
-                //m_savedPointsF.add(f);
+                drawElements.add(new DrawElement(x_Points, y_Points, this.m_linePaint.getColor()));
                 x_Points.clear();
                 y_Points.clear();
-                //m_currentPointsF.clear();
 
                 Log.i("onTouchEvent", String.format("action=%s",
                         actionNames[action]
@@ -194,11 +134,7 @@ public class PaintAreaView extends View implements OnTouchListener {
                 m_currentPath = new Path();
                 m_currentPath.reset(); // Clear any lines and curves from the path, making it empty.
                 m_currentPath.moveTo(x, y);
-                //m_currentPath.transform()
-//                m_currentPointsF.add(new PointF(
-//                        x,
-//                        y
-//                ));
+
                 x_Points.add(x);
                 y_Points.add(y);
 

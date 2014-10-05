@@ -16,28 +16,40 @@ import java.util.List;
  */
 public class DrawElement {
 
-    private Float[] x_Points;
-    private Float[] y_Points;
+    private List<Float> x_Points;
+    private List<Float> y_Points;
     private int m_Color;
 
     public int getColor() { return m_Color; }
-    public List<Float> getXPoints() { return Arrays.asList(x_Points); }
-    public List<Float> getYPoints() { return Arrays.asList(y_Points); }
+    public List<Float> getXPoints() { return x_Points; }
+    public List<Float> getYPoints() { return y_Points; }
+    public int getSize() { return x_Points.size(); }
     public Path getPath() {
         Path path = new Path();
-        for(int arrIdx = 0; arrIdx < x_Points.length; arrIdx++) {
+        for(int arrIdx = 0; arrIdx < x_Points.size(); arrIdx++) {
             if(arrIdx == 0) {
-                path.moveTo(x_Points[arrIdx], y_Points[arrIdx]);
+                path.moveTo(x_Points.get(arrIdx), y_Points.get(arrIdx));
             } else {
-                path.lineTo(x_Points[arrIdx], y_Points[arrIdx]);
+                path.lineTo(x_Points.get(arrIdx), y_Points.get(arrIdx));
             }
         }
         return path;
     }
 
+    public void deletePoints(int start, int end) {
+        if(start <= 0 || end > x_Points.size()) { return; }
+
+        for(int i = start; i < end; i++) {
+            x_Points.remove(i);
+            y_Points.remove(i);
+        }
+
+
+    }
+
     public DrawElement(List<Float> x_points, List<Float> y_points, int color) {
-        this.x_Points = x_points.toArray(new Float[x_points.size()]);
-        this.y_Points = y_points.toArray(new Float[y_points.size()]);
+        this.x_Points = x_points;
+        this.y_Points = y_points;
         this.m_Color = color;
     }
 

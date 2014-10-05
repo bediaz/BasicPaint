@@ -26,10 +26,8 @@ import java.util.List;
 
 public class PaintActivity extends BaseActivity {
 
-    private final String TAG = "Paint Activity";
 
-    static final String POINTS_DRAWN = "pointsSaved";
-    static final String COLORS_SAVED = "colorsSaved";
+    private final String TAG = "Paint Activity";
 
     PaintAreaView m_areaView;
     PaletteView m_rootLayout;
@@ -38,10 +36,6 @@ public class PaintActivity extends BaseActivity {
     // -*~-*~-*~-*~-*~-*~-*~-*~-*~
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         LinearLayout masterLayout = new LinearLayout(this);
         masterLayout.setOrientation(LinearLayout.VERTICAL);
@@ -65,16 +59,6 @@ public class PaintActivity extends BaseActivity {
                 m_rootLayout.initializeListeners(pv);
                 m_rootLayout.addView(pv);
 
-//
-//                for (int childIndex = 0; childIndex < m_rootLayout.getChildCount(); childIndex++) {
-//                    PaintView child = (PaintView) m_rootLayout.getChildAt(childIndex);
-//                    child.setActive(false);
-//                }
-//
-//                if (m_rootLayout.getOnColorChangedListener() != null) {
-//                    m_rootLayout.getOnColorChangedListener().onColorChanged(pv.getColor());
-//                }
-//                pv.setActive(true);
                 pv.getOnSplotchTouchListener().onSplotchTouched(pv);
                 pv.invalidate();
             }
@@ -104,12 +88,14 @@ public class PaintActivity extends BaseActivity {
         setContentView(masterLayout);
     }
 
+    /* not needed for this project. calling onResume when program launches is sufficient
     @Override
     protected void onStart() {
         super.onStart();
         restoreData();
         Log.i(TAG, "onStart");
     }
+    */
 
     @Override
     protected void onResume() {
@@ -151,6 +137,12 @@ public class PaintActivity extends BaseActivity {
         StringBuilder str = new StringBuilder();
         str.append(gson.toJson(m_areaView.getDrawElements()));
 
+        // save drawElements json
+        SharedPreferences settings = getSharedPreferences(PaintView.PREFS, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("drawElements", str.toString());
+        editor.commit();
+
         FileOutputStream outputStream;
 
         try {
@@ -161,31 +153,6 @@ public class PaintActivity extends BaseActivity {
             e.printStackTrace();
         }
     }
-
-
-//    @Override
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//        Log.i(TAG, "onSaveInstanceState");
-//
-//        // restore settings on rotate
-//        if (savedInstanceState != null) {
-//            ArrayList<Float[]> points = (ArrayList<Float[]>) savedInstanceState.getSerializable(POINTS_DRAWN);
-//            ArrayList<Integer> colors = (ArrayList<Integer>) savedInstanceState.getSerializable(COLORS_SAVED);
-//            m_areaView.restorePointsAndColors(points, colors);
-//        }
-//    }
-
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        Log.i(TAG, "onSaveInstanceState");
-//
-//        ArrayList<Float[]> points = m_areaView.getPoints();
-//        ArrayList<Integer> colors = m_areaView.getStrokeColors();
-//        outState.putSerializable(POINTS_DRAWN, (Serializable) points);
-//        outState.putSerializable(COLORS_SAVED, (Serializable) colors);
-//    }
 
     @Override
     protected void onNewIntent(Intent intent) {
