@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- create menu group -->
     <group android:id="@+id/group_watch_menu">
+        <item android:id="@+id/delete_menu_button"
+            android:icon="@drawable/ic_delete_button"
+            android:showAsAction="ifRoom"
+            android:title="Delete"
+            />
         <item android:id="@+id/watch_menu_button"
             android:icon="@drawable/ic_mode_watch_button"
             android:showAsAction="ifRoom"

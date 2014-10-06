@@ -206,7 +206,6 @@ public class WatchActivity extends BaseActivity {
         if(animation != null) {
             animation.cancel();
         }
-        Log.i(TAG, "onPause");
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = settings.edit();
@@ -217,6 +216,5 @@ public class WatchActivity extends BaseActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Log.i(TAG, "onNewIntent");
     }
 }

@@ -50,18 +50,12 @@ public class BaseActivity extends Activity {
         switch(m_CurrentMenu) {
             case Create: {
                 menu.setGroupVisible(R.id.group_create_menu, true);
-                //menu.setGroupVisible(R.id.group_watch_menu, false);
-                //menu.setGroupVisible(R.id.group_palette_menu, false);
                 return true;
             }
             case Watch:
-                //menu.setGroupVisible(R.id.group_create_menu, false);
                 menu.setGroupVisible(R.id.group_watch_menu, true);
-                //menu.setGroupVisible(R.id.group_palette_menu, false);
                 return true;
             case Palette:
-                //menu.setGroupVisible(R.id.group_create_menu, false);
-                //menu.setGroupVisible(R.id.group_watch_menu, false);
                 menu.setGroupVisible(R.id.group_palette_menu, true);
                 return true;
             default:
@@ -71,11 +65,9 @@ public class BaseActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "    onOptionsItemSelected");
         switch(item.getItemId()) {
             case R.id.palette_mode:
             case R.id.create_menu_button: {
-                Log.i(TAG, "Starting PaintActivity intent");
                 m_CurrentMenu = CurrentMenu.Watch;
                 Intent intent = new Intent(this, PaintActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -84,13 +76,23 @@ public class BaseActivity extends Activity {
                 overridePendingTransition(android.R.anim.slide_in_left | android.R.anim.fade_in, android.R.anim.fade_out);
                 return true;
             }
+            case R.id.delete_menu_button: {
+                m_CurrentMenu = CurrentMenu.Create;
+                Intent intent = new Intent(this, PaintActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("clear", true);
+                intent.putExtras(bundle);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                return true;
+            }
             case R.id.palette_menu_button: {
-                Log.i(TAG, "Starting PaletteActivity intent");
                 m_CurrentMenu = CurrentMenu.Palette;
                 Intent intent = new Intent(this, PaletteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.slide_in_left | android.R.anim.fade_in, android.R.anim.fade_out);
                 return true;
@@ -109,10 +111,8 @@ public class BaseActivity extends Activity {
                 play = !play;
                 item.setIcon(play ? R.drawable.ic_pause_button : R.drawable.ic_play_button);
                 StartPlayback();
-
                 return true;
             default:
-                Log.i(TAG, "onOptionsItemSelected Default");
                 return super.onOptionsItemSelected(item);
         }
     }

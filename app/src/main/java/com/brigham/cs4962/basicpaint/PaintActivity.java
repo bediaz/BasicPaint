@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
@@ -26,13 +27,11 @@ import java.util.List;
 
 public class PaintActivity extends BaseActivity {
 
-
+    private static final String FILE_PATH = "draw_elements.txt";
     private final String TAG = "Paint Activity";
-
-    PaintAreaView m_areaView;
+    private PaintAreaView m_areaView;
 
     @Override
-    // -*~-*~-*~-*~-*~-*~-*~-*~-*~
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -43,32 +42,31 @@ public class PaintActivity extends BaseActivity {
         m_areaView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2f));
 
         masterLayout.addView(m_areaView);
-
-        //restoreData();
-
         setContentView(masterLayout);
     }
 
-    /* not needed for this project. calling onResume when program launches is sufficient
-    @Override
-    protected void onStart() {
-        super.onStart();
-        restoreData();
-        Log.i(TAG, "onStart");
+    private boolean clearPaintView() {
+        File f = new File(FILE_PATH);
+        return f.delete();
     }
-    */
 
     @Override
     protected void onResume() {
-        Log.i(TAG, "onResume");
         restoreData();
         m_areaView.setUserDraw(true);
         super.onResume();
     }
 
     private void restoreData() {
-        Log.i(TAG, "restoreData");
         try {
+
+            Intent intent = getIntent();
+            boolean clear = intent.getBooleanExtra("clear", false);
+            if(clear) {
+                if(clearPaintView()) {
+ //                   return;
+                }
+            }
             FileInputStream fis = openFileInput(FILE_PATH);
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader bufferedReader = new BufferedReader(isr);
@@ -93,8 +91,6 @@ public class PaintActivity extends BaseActivity {
         } catch(Exception ex) {
         }
     }
-
-    private static final String FILE_PATH = "draw_elements.txt";
 
     @Override
     protected void onPause() {
