@@ -89,7 +89,7 @@ public class PaintActivity extends BaseActivity {
             int c = settings.getInt("strokeColor", Color.BLACK);
             m_areaView.setStrokeColor(c);
             Drawable drawable = getApplicationContext().getResources().getDrawable(R.drawable.ic_mode_palette_button);
-            drawable.setColorFilter(new PorterDuffColorFilter(c, PorterDuff.Mode.ADD));
+            drawable.setColorFilter(new PorterDuffColorFilter(c, PorterDuff.Mode.MULTIPLY));
         } catch(Exception ex) {
         }
     }
