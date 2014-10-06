@@ -1,4 +1,4 @@
-package com.brigham.cs4962.paintactivity;
+package com.brigham.cs4962.basicpaint;
 
 import android.content.Context;
 import android.graphics.Canvas;

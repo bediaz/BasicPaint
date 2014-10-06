@@ -1,4 +1,4 @@
-package com.brigham.cs4962.paintactivity;
+package com.brigham.cs4962.basicpaint;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -20,6 +20,7 @@ import java.util.Arrays;
 public class PaletteView extends ViewGroup {
 
     ArrayList<Integer> m_paletteColors;
+    private Context appContext;
 
     int m_color;
 
@@ -28,6 +29,7 @@ public class PaletteView extends ViewGroup {
 
     public PaletteView(Context context) {
         super(context);
+        appContext = context;
         m_color = Color.rgb(205, 133, 63); // palette color (brown)
         setWillNotDraw(false);
 
@@ -42,6 +44,7 @@ public class PaletteView extends ViewGroup {
                 Color.parseColor("#A52A2A"), // brown
                 Color.WHITE,
                 Color.BLACK));
+        setBackgroundColor(Color.WHITE);
     }
 
     public OnColorChangedListener getOnSplotchTouchListener() {
@@ -139,7 +142,10 @@ public class PaletteView extends ViewGroup {
                 }
                 v.setActive(true);
                 if (m_OnColorChangedListener != null) {
-                    m_OnColorChangedListener.onColorChanged(((PaintView) v).getColor());
+                    int c = ((PaintView) v).getColor();
+                    m_OnColorChangedListener.onColorChanged(c);
+//                    Drawable drawable = appContext.getResources().getDrawable(R.drawable.ic_mode_palette_button);
+//                    drawable.setColorFilter(new PorterDuffColorFilter(c, PorterDuff.Mode.ADD));
                 }
                 v.invalidate();
             }

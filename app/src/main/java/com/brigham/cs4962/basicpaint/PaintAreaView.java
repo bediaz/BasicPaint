@@ -1,10 +1,11 @@
-package com.brigham.cs4962.paintactivity;
+package com.brigham.cs4962.basicpaint;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,10 +19,23 @@ import java.util.List;
  */
 public class PaintAreaView extends View implements OnTouchListener {
 
+    public static int getPaintViewWidth() {
+            DisplayMetrics metrics = appContext.getResources().getDisplayMetrics();
+        m_viewWidth = metrics.widthPixels;
+            return metrics.widthPixels;
+        }
+    public static int getPaintViewHeight() {
+        DisplayMetrics metrics = appContext.getResources().getDisplayMetrics();
+        m_viewHeight = metrics.heightPixels;
+        return metrics.heightPixels;
+    }
+
+    private static Context appContext;
     private final String TAG = "PaintAreaView";
 
     private boolean allowUserDraw;
-    private int m_strokeColor, m_viewWidth, m_viewHeight;
+    private int m_strokeColor;
+    private static int m_viewWidth, m_viewHeight;
 
     private Path m_currentPath;
     private Paint m_linePaint;
@@ -48,6 +62,7 @@ public class PaintAreaView extends View implements OnTouchListener {
 
     public PaintAreaView(Context context) {
         super(context);
+        appContext = context;
         setFocusable(true);
         setFocusableInTouchMode(true);
         m_linePaint = defaultPaintStyle();
@@ -56,6 +71,7 @@ public class PaintAreaView extends View implements OnTouchListener {
         m_currentPath = new Path();
         m_drawElements = new ArrayList<DrawElement>();
         setOnTouchListener(this);
+        setBackgroundColor(Color.WHITE);
     }
 
     public void setStrokeColor(int newColor) {
@@ -70,8 +86,8 @@ public class PaintAreaView extends View implements OnTouchListener {
         Log.i(TAG, "onSizeChanged, width=" + w + ",height=" + h);
 
         // get the width, height
-        m_viewWidth = this.getMeasuredWidth();
-        m_viewHeight = h;
+        m_viewWidth = getPaintViewWidth();
+        m_viewHeight = getPaintViewHeight();
         invalidate();
     }
 
@@ -87,20 +103,21 @@ public class PaintAreaView extends View implements OnTouchListener {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.save();
-        canvas.scale(1.0f, 1.0f);
-
+        int i = 0;
         for (DrawElement element : m_drawElements) {
             Path p = element.getPath();
             int c = element.getColor();
             m_linePaint.setColor(c);
+
+            if(p == null) {
+                continue;
+            }
             canvas.drawPath(p, m_linePaint);
         }
 
         // draw current line that hasn't been added to DrawElements yet.
         m_linePaint.setColor(this.m_strokeColor);
         canvas.drawPath(m_currentPath, m_linePaint);
-        canvas.restore();
     }
 
     @Override
@@ -108,7 +125,7 @@ public class PaintAreaView extends View implements OnTouchListener {
         if(!allowUserDraw) { return true; }
 
         int action = event.getActionMasked();
-        float x = event.getX();// / m_viewWidth; // scale between 0 < x < 1
+        float x = event.getX();
         float y = event.getY();// / m_viewHeight; // scale between 0 < y < 1
 
         switch (action) {
@@ -122,15 +139,15 @@ public class PaintAreaView extends View implements OnTouchListener {
                 m_currentPath = new Path();
                 m_currentPath.reset(); // Clear any lines and curves from the path, making it empty.
                 m_currentPath.moveTo(x, y);
-                m_PointsX.add(x);
-                m_PointsY.add(y);
+                m_PointsX.add(x / m_viewWidth);
+                m_PointsY.add(y / m_viewHeight);
                 return true;
             }
             case MotionEvent.ACTION_MOVE: {
                 // Add a line from the last point to the specified point (x,y).
                 m_currentPath.lineTo(x, y);
-                m_PointsX.add(x);
-                m_PointsY.add(y);
+                m_PointsX.add(x / m_viewWidth);
+                m_PointsY.add(y / m_viewHeight);
                 break;
             }
             default: {

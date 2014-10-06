@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">PaintActivity</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_base">BaseActivity</string>
-    <string name="title_activity_watch">WatchActivity</string>
-    <string name="title_activity_palette">PaletteActivity</string>
+    <string name="app_name">BasicPaint</string>
+    <string name="title_activity_base">Paint</string>
+    <string name="title_activity_watch">Movie mode</string>
+    <string name="title_activity_palette">Palette</string>
 
 </resources>

@@ -1,9 +1,10 @@
-package com.brigham.cs4962.paintactivity;
+package com.brigham.cs4962.basicpaint;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -42,21 +43,11 @@ public class WatchActivity extends BaseActivity {
         }
     }
 
-//    public static List<DrawElement> cloneList(List<DrawElement> elements) {
-//        List<DrawElement> clonedList = new ArrayList<DrawElement>(elements.size());
-//        for (DrawElement element : elements) {
-//            clonedList.add(new DrawElement(element));
-//        }
-//        return clonedList;
-//    }
-
-
-
     private void DrawPaint() {
         if(numOfPointsToDraw <= 0 || totalPointCount <= 0) { return; }
         Log.i(TAG, "DrawPaint");
-        CalculateTotalNumOfPoints();
-        List<DrawElement> temp = new ArrayList<DrawElement>();// = cloneList(drawElements); // deep copy needed
+        //CalculateTotalNumOfPoints();
+        List<DrawElement> temp = new ArrayList<DrawElement>();
 
         int pointCount = 0;
 
@@ -81,8 +72,19 @@ public class WatchActivity extends BaseActivity {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        DrawPaint();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        InitializeUI();
+
+    }
+
+    private void InitializeUI() {
 
         LinearLayout masterLayout = new LinearLayout(this);
         masterLayout.setOrientation(LinearLayout.VERTICAL);
@@ -112,6 +114,7 @@ public class WatchActivity extends BaseActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 DrawPaint();
             }
+
         });
         masterLayout.addView(m_paintArea);
         masterLayout.addView(m_seekBar);
@@ -161,7 +164,7 @@ public class WatchActivity extends BaseActivity {
         if (play) {
             // will update the "progress" of m_seekBar until it reaches progress
             animation = ObjectAnimator.ofInt(m_seekBar, "progress", totalPointCount);
-            animation.setDuration(10000 - (int)(10000*((float)numOfPointsToDraw/totalPointCount))); // 0.5 second
+            animation.setDuration(5000 - (int)(5000*((float)numOfPointsToDraw/totalPointCount))); // 0.5 second
             animation.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animator) {
@@ -195,8 +198,6 @@ public class WatchActivity extends BaseActivity {
 
         }
     }
-
-
 
     @Override
     protected void onPause() {

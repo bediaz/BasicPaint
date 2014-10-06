@@ -1,12 +1,8 @@
-package com.brigham.cs4962.paintactivity;
+package com.brigham.cs4962.basicpaint;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -60,10 +56,6 @@ public class PaletteActivity extends BaseActivity {
             m_rootLayout.addView(pv);
         }
 
-        //masterLayout.addView(m_rootLayout);
-
         setContentView(m_rootLayout);
-
-        this.findViewById(android.R.id.content).setBackgroundColor(Color.RED);
     }
 }

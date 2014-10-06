@@ -1,9 +1,12 @@
-package com.brigham.cs4962.paintactivity;
+package com.brigham.cs4962.basicpaint;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -83,7 +86,10 @@ public class PaintActivity extends BaseActivity {
             m_areaView.setDrawElements(drawElements);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            m_areaView.setStrokeColor(settings.getInt("strokeColor", Color.BLACK));
+            int c = settings.getInt("strokeColor", Color.BLACK);
+            m_areaView.setStrokeColor(c);
+            Drawable drawable = getApplicationContext().getResources().getDrawable(R.drawable.ic_mode_palette_button);
+            drawable.setColorFilter(new PorterDuffColorFilter(c, PorterDuff.Mode.ADD));
         } catch(Exception ex) {
         }
     }
