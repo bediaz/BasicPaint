@@ -1,12 +1,16 @@
 package com.brigham.cs4962.paintactivity;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
@@ -24,35 +28,53 @@ public class WatchActivity extends BaseActivity {
 
     private PaintAreaView m_paintArea;
     private SeekBar m_seekBar;
-    private int totalNumOfPoints = 0;
-    private int totalNumOfPointsToDraw = 0;
-    private ArrayList<DrawElement> drawElements;
+    private int totalPointCount = 0;
+    private int numOfPointsToDraw = 0;
+    private List<DrawElement> drawElements;
 
     private void CalculateTotalNumOfPoints() {
+        totalPointCount = 0;
         if(drawElements == null || drawElements.size() <= 0) { return; }
         Log.i(TAG, "CalculateTotalNumOfPoints");
 
         for(int outerIdx = 0; outerIdx < drawElements.size(); outerIdx++) {
-            totalNumOfPoints += drawElements.get(outerIdx).getSize();
+            totalPointCount += drawElements.get(outerIdx).getSize();
         }
     }
+
+//    public static List<DrawElement> cloneList(List<DrawElement> elements) {
+//        List<DrawElement> clonedList = new ArrayList<DrawElement>(elements.size());
+//        for (DrawElement element : elements) {
+//            clonedList.add(new DrawElement(element));
+//        }
+//        return clonedList;
+//    }
+
+
+
     private void DrawPaint() {
-        if(totalNumOfPointsToDraw <= 0 || totalNumOfPoints <= 0) { return; }
+        if(numOfPointsToDraw <= 0 || totalPointCount <= 0) { return; }
         Log.i(TAG, "DrawPaint");
-        ArrayList<DrawElement> temp = drawElements;
+        CalculateTotalNumOfPoints();
+        List<DrawElement> temp = new ArrayList<DrawElement>();// = cloneList(drawElements); // deep copy needed
+
         int pointCount = 0;
 
-        for(int outerIdx = 0; outerIdx < temp.size(); outerIdx++) {
-            for(int innerIdx = 0; innerIdx < temp.get(outerIdx).getXPoints().size(); innerIdx++) {
-                if(pointCount++ >= totalNumOfPointsToDraw) {
-                    temp.get(outerIdx).deletePoints(innerIdx, drawElements.get(outerIdx).getXPoints().size());
-                    int numToRemove = drawElements.size();
-                    for(int i = outerIdx; i < numToRemove; i++) {
-                        temp.remove(outerIdx);
-                    }
+        for(int outerIdx = 0; outerIdx < drawElements.size() && pointCount < numOfPointsToDraw; outerIdx++) {
+            List<Float> x_list = new ArrayList<Float>();
+            List<Float> y_list = new ArrayList<Float>();
+            temp.add(new DrawElement(x_list, y_list, drawElements.get(outerIdx).getColor()));
+
+            for(int innerIdx = 0; innerIdx < drawElements.get(outerIdx).getXPoints().size(); innerIdx++) {
+                float x = drawElements.get(outerIdx).getXPoints().get(innerIdx);
+                float y = drawElements.get(outerIdx).getYPoints().get(innerIdx);
+                temp.get(outerIdx).addPoint(x, y);
+
+                if (pointCount++ >= numOfPointsToDraw) {
                     break;
                 }
             }
+            temp.get(outerIdx).createPath();
         }
 
         m_paintArea.setDrawElements(temp);
@@ -70,6 +92,7 @@ public class WatchActivity extends BaseActivity {
 
         m_paintArea = new PaintAreaView(this);
         m_paintArea.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2f));
+        m_paintArea.setUserDraw(false); // place paintareaview in view-only mode
 
         params.gravity = Gravity.BOTTOM;
 
@@ -77,22 +100,16 @@ public class WatchActivity extends BaseActivity {
         m_seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                // TODO: limit the draw event
-                if(!fromUser) { return; }
-                totalNumOfPointsToDraw = progress;
-                Log.i(TAG, "onProgressChanged, progress=" + progress);
+                numOfPointsToDraw = progress;
+                DrawPaint();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.i(TAG, "onStartTrackingTouch");
-                // TODO: limit the draw event
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO: limit the draw event
-                Log.i(TAG, "onStopTrackingTouch");
                 DrawPaint();
             }
         });
@@ -100,8 +117,15 @@ public class WatchActivity extends BaseActivity {
         masterLayout.addView(m_seekBar);
 
         masterLayout.setBackgroundColor(Color.LTGRAY);
+
+        Bundle bundle = getIntent().getExtras();
+
+        if(bundle != null) {
+            play = bundle.getBoolean("Play", false);
+        }
         setContentView(masterLayout);
     }
+    boolean play = false;
 
     @Override
     protected void onStart() {
@@ -109,25 +133,67 @@ public class WatchActivity extends BaseActivity {
         Log.i(TAG, "onStart");
     }
 
+    ObjectAnimator animation;
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "onResume");
 
         // Restore drawElements json
-        SharedPreferences settings = getSharedPreferences(PaintView.PREFS, 0);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String json = settings.getString("drawElements", "");
 
         // convert json to gson
         Gson gson = new Gson();
 
-        Type listOfDrawElement = new TypeToken<List<DrawElement>>(){}.getType();
+        Type listOfDrawElement = new TypeToken<List<DrawElement>>() {
+        }.getType();
         // convert gson to ArrayList<DrawElements>
         drawElements = gson.fromJson(json, listOfDrawElement);
-
         CalculateTotalNumOfPoints();
-        m_seekBar.setMax(totalNumOfPoints);
-        //m_paintArea.setDrawElements(drawElements);
+
+        int scrubPosition = settings.getInt("scrubPosition", 0);
+        m_seekBar.setMax(totalPointCount);
+        m_seekBar.setProgress(scrubPosition);
+
+
+        if (play) {
+            // will update the "progress" of m_seekBar until it reaches progress
+            animation = ObjectAnimator.ofInt(m_seekBar, "progress", totalPointCount);
+            animation.setDuration(10000 - (int)(10000*((float)numOfPointsToDraw/totalPointCount))); // 0.5 second
+            animation.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+
+                    Intent intent = new Intent(WatchActivity.this, BaseActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("Play", false);
+                    intent.putExtras(bundle);
+
+                    startActivity(intent);
+                    BaseActivity.instance.StartPlayback();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animation.setInterpolator(new LinearInterpolator());
+            animation.start();
+
+        }
     }
 
 
@@ -135,7 +201,16 @@ public class WatchActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        //animation.setAutoCancel(true);
+        if(animation != null) {
+            animation.cancel();
+        }
         Log.i(TAG, "onPause");
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt("scrubPosition", numOfPointsToDraw);
+        editor.commit();
     }
 
     @Override

@@ -16,8 +16,6 @@ import android.view.View;
  */
 public class PaintView extends View {
 
-    public static final String PREFS = "PaintActivity";
-
     OnSplotchTouchListener m_onSplotchTouchListener = null;
     OnSplotchReleaseListener m_onSplotchReleaseListener = null;
     private RectF m_contentRect;

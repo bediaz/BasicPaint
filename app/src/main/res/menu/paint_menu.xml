@@ -7,12 +7,11 @@
             android:showAsAction="ifRoom"
             android:title="Watch"
             />
-        <item android:id="@+id/pause_play"
+        <item android:id="@+id/palette_menu"
+            android:icon="@drawable/ic_mode_palette_button"
             android:showAsAction="ifRoom"
-            android:icon="@drawable/ic_pause_button"
-            android:title="Pause/Play"
+            android:title="Palette"
             />
-
     </group>
 
     <!-- watch menu group -->
@@ -22,10 +21,19 @@
             android:icon="@drawable/ic_mode_create_button"
             android:title="Create"
             />
-        <item android:id="@+id/palette_menu"
-            android:icon="@drawable/ic_mode_palette_button"
+        <item android:id="@+id/pause_play"
             android:showAsAction="ifRoom"
-            android:title="Palette"
+            android:icon="@drawable/ic_play_button"
+            android:title="Pause/Play"
+            />
+    </group>
+
+    <!-- watch menu group -->
+    <group android:id="@+id/group_palette_menu">
+        <item android:id="@+id/palette_mode"
+            android:showAsAction="ifRoom"
+            android:icon="@drawable/ic_mode_create_button"
+            android:title="Create"
             />
     </group>
 

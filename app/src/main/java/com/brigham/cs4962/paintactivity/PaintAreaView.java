@@ -19,49 +19,49 @@ import java.util.List;
 public class PaintAreaView extends View implements OnTouchListener {
 
     private final String TAG = "PaintAreaView";
-    Path m_paths;
-    Path m_currentPath;
-    Paint m_linePaint;
 
-    List<Float> x_Points;
-    List<Float> y_Points;
+    private boolean allowUserDraw;
+    private int m_strokeColor, m_viewWidth, m_viewHeight;
 
-   // int m_strokeColor;
+    private Path m_currentPath;
+    private Paint m_linePaint;
 
-    int m_viewWidth, m_viewHeight;
+    private List<Float> m_PointsX, m_PointsY;
+    private List<DrawElement> m_drawElements;
 
-    public ArrayList<DrawElement> getDrawElements() {
-        return drawElements;
+    public List<DrawElement> getDrawElements() {         return m_drawElements;    }
+    public void setDrawElements(List<DrawElement> temp) {
+        if(temp == null || temp.size() == 0) { return; }
+        this.m_drawElements = new ArrayList<DrawElement>(temp);
+        invalidate();
     }
 
-    public void setDrawElements(ArrayList<DrawElement> drawElements) {
-        if(drawElements != null) { this.drawElements = drawElements; }
+    public void clearCurrentCurrentPath() {
+        if(!m_currentPath.isEmpty()) {
+            m_currentPath = new Path();
+            m_currentPath.reset(); // Clear any lines and curves from the path, making it empty.
+        }
     }
-
-    ArrayList<DrawElement> drawElements;
+    public void setUserDraw(boolean allowUserDraw) {
+        this.allowUserDraw = allowUserDraw;
+    }
 
     public PaintAreaView(Context context) {
         super(context);
         setFocusable(true);
         setFocusableInTouchMode(true);
         m_linePaint = defaultPaintStyle();
-        m_paths = new Path();
-        x_Points = new ArrayList<Float>();
-        y_Points = new ArrayList<Float>();
-
+        m_PointsX = new ArrayList<Float>();
+        m_PointsY = new ArrayList<Float>();
         m_currentPath = new Path();
-        drawElements = new ArrayList<DrawElement>();
-
+        m_drawElements = new ArrayList<DrawElement>();
         setOnTouchListener(this);
     }
 
     public void setStrokeColor(int newColor) {
         // sanity check since this can get called from other classes
-        if(this.m_linePaint == null) {
-            this.m_linePaint = defaultPaintStyle();
-        }
-
-        this.m_linePaint.setColor(newColor);
+        this.m_strokeColor = newColor;
+        invalidate();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class PaintAreaView extends View implements OnTouchListener {
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(5);
-        paint.setColor(Color.BLACK);
+        setStrokeColor(Color.BLACK);
         return paint;
     }
 
@@ -90,7 +90,7 @@ public class PaintAreaView extends View implements OnTouchListener {
         canvas.save();
         canvas.scale(1.0f, 1.0f);
 
-        for (DrawElement element : drawElements) {
+        for (DrawElement element : m_drawElements) {
             Path p = element.getPath();
             int c = element.getColor();
             m_linePaint.setColor(c);
@@ -98,69 +98,42 @@ public class PaintAreaView extends View implements OnTouchListener {
         }
 
         // draw current line that hasn't been added to DrawElements yet.
-        //m_linePaint.setColor(this.m_strokeColor);
+        m_linePaint.setColor(this.m_strokeColor);
         canvas.drawPath(m_currentPath, m_linePaint);
-
         canvas.restore();
     }
 
     @Override
     public boolean onTouch(View view, MotionEvent event) {
+        if(!allowUserDraw) { return true; }
 
         int action = event.getActionMasked();
         float x = event.getX();// / m_viewWidth; // scale between 0 < x < 1
         float y = event.getY();// / m_viewHeight; // scale between 0 < y < 1
 
-        String[] actionNames = {
-                "ACTION_DOWN",
-                "ACTION_UP",
-                "ACTION_MOVE",
-                "ACTION_CANCEL",
-                "ACTION_OUTSIDE"
-        };
-
         switch (action) {
             case MotionEvent.ACTION_UP: {
-                drawElements.add(new DrawElement(x_Points, y_Points, this.m_linePaint.getColor()));
-                x_Points.clear();
-                y_Points.clear();
-
-                Log.i("onTouchEvent", String.format("action=%s",
-                        actionNames[action]
-                ));
+                m_drawElements.add(new DrawElement(m_PointsX, m_PointsY, this.m_linePaint.getColor()));
+                m_PointsX.clear();
+                m_PointsY.clear();
                 break;
             }
             case MotionEvent.ACTION_DOWN: {
                 m_currentPath = new Path();
                 m_currentPath.reset(); // Clear any lines and curves from the path, making it empty.
                 m_currentPath.moveTo(x, y);
-
-                x_Points.add(x);
-                y_Points.add(y);
-
-                Log.i("onTouchEvent", String.format("action=%s, coord=(%f, %f)",
-                                actionNames[action],
-                                x,
-                                y)
-                );
+                m_PointsX.add(x);
+                m_PointsY.add(y);
                 return true;
             }
             case MotionEvent.ACTION_MOVE: {
                 // Add a line from the last point to the specified point (x,y).
                 m_currentPath.lineTo(x, y);
-               // m_currentPointsF.add(new PointF(x, y));
-                x_Points.add(x);
-                y_Points.add(y);
-
-                Log.i("onTouchEvent", String.format("action=%s, coord=(%f, %f)",
-                                actionNames[action],
-                                x,
-                                y)
-                );
+                m_PointsX.add(x);
+                m_PointsY.add(y);
                 break;
             }
             default: {
-                Log.i("ACTION", String.format("actionCode=%d", action));
                 return false;
             }
         }
