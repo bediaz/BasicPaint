@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -32,11 +33,12 @@ public class WatchActivity extends BaseActivity {
     private int totalPointCount = 0;
     private int numOfPointsToDraw = 0;
     private List<DrawElement> drawElements;
+    private ObjectAnimator animator;
+    private boolean play = false;
 
     private void CalculateTotalNumOfPoints() {
         totalPointCount = 0;
         if(drawElements == null || drawElements.size() <= 0) { return; }
-        Log.i(TAG, "CalculateTotalNumOfPoints");
 
         for(int outerIdx = 0; outerIdx < drawElements.size(); outerIdx++) {
             totalPointCount += drawElements.get(outerIdx).getSize();
@@ -44,9 +46,6 @@ public class WatchActivity extends BaseActivity {
     }
 
     private void DrawPaint() {
-        if(numOfPointsToDraw <= 0 || totalPointCount <= 0) { return; }
-        Log.i(TAG, "DrawPaint");
-        //CalculateTotalNumOfPoints();
         List<DrawElement> temp = new ArrayList<DrawElement>();
 
         int pointCount = 0;
@@ -57,13 +56,12 @@ public class WatchActivity extends BaseActivity {
             temp.add(new DrawElement(x_list, y_list, drawElements.get(outerIdx).getColor()));
 
             for(int innerIdx = 0; innerIdx < drawElements.get(outerIdx).getXPoints().size(); innerIdx++) {
+                if (numOfPointsToDraw <= pointCount++) {
+                    break;
+                }
                 float x = drawElements.get(outerIdx).getXPoints().get(innerIdx);
                 float y = drawElements.get(outerIdx).getYPoints().get(innerIdx);
                 temp.get(outerIdx).addPoint(x, y);
-
-                if (pointCount++ >= numOfPointsToDraw) {
-                    break;
-                }
             }
             temp.get(outerIdx).createPath();
         }
@@ -81,7 +79,6 @@ public class WatchActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         InitializeUI();
-
     }
 
     private void InitializeUI() {
@@ -128,15 +125,6 @@ public class WatchActivity extends BaseActivity {
         }
         setContentView(masterLayout);
     }
-    boolean play = false;
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i(TAG, "onStart");
-    }
-
-    ObjectAnimator animation;
 
     @Override
     protected void onResume() {
@@ -145,6 +133,7 @@ public class WatchActivity extends BaseActivity {
 
         // Restore drawElements json
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
         String json = settings.getString("drawElements", "");
 
         // convert json to gson
@@ -157,15 +146,19 @@ public class WatchActivity extends BaseActivity {
         CalculateTotalNumOfPoints();
 
         int scrubPosition = settings.getInt("scrubPosition", 0);
+
         m_seekBar.setMax(totalPointCount);
         m_seekBar.setProgress(scrubPosition);
 
+        if(totalPointCount <= scrubPosition) {
+            return;
+        }
 
         if (play) {
             // will update the "progress" of m_seekBar until it reaches progress
-            animation = ObjectAnimator.ofInt(m_seekBar, "progress", totalPointCount);
-            animation.setDuration(5000 - (int)(5000*((float)numOfPointsToDraw/totalPointCount))); // 0.5 second
-            animation.addListener(new Animator.AnimatorListener() {
+            animator = ObjectAnimator.ofInt(m_seekBar, "progress", totalPointCount);
+            animator.setDuration(5000 - (int) (5000 * ((float) numOfPointsToDraw / totalPointCount))); // 0.5 second
+            animator.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animator) {
 
@@ -173,19 +166,14 @@ public class WatchActivity extends BaseActivity {
 
                 @Override
                 public void onAnimationEnd(Animator animator) {
-
-                    Intent intent = new Intent(WatchActivity.this, BaseActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean("Play", false);
-                    intent.putExtras(bundle);
-
-                    startActivity(intent);
-                    BaseActivity.instance.StartPlayback();
+                    BaseActivity.instance.setPlay_PauseButton(true);
+                    numOfPointsToDraw = 0;
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animator) {
-
+                    animator.removeAllListeners();
+                    finish();
                 }
 
                 @Override
@@ -193,18 +181,18 @@ public class WatchActivity extends BaseActivity {
 
                 }
             });
-            animation.setInterpolator(new LinearInterpolator());
-            animation.start();
 
+            animator.setInterpolator(new LinearInterpolator());
+            animator.start();
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //animation.setAutoCancel(true);
-        if(animation != null) {
-            animation.cancel();
+
+        if(animator != null) {
+            animator.cancel();
         }
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

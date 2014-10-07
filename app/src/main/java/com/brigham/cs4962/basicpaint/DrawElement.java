@@ -72,12 +72,12 @@ public class DrawElement {
 
     public DrawElement(List<Float> x_points, List<Float> y_points, int color) {
 
-        this.x_Points = new ArrayList<Float>();
-        this.y_Points = new ArrayList<Float>();
-        for(int idx = 0; idx < x_points.size(); idx++) {
-            x_Points.add(x_points.get(idx));
-            y_Points.add(y_points.get(idx));
-        }
+        this.x_Points = new ArrayList<Float>(x_points);
+        this.y_Points = new ArrayList<Float>(y_points);
+//        for(int idx = 0; idx < x_points.size(); idx++) {
+//            x_Points.add(x_points.get(idx));
+//            y_Points.add(y_points.get(idx));
+//        }
 
         this.m_Color = color;
         this.width = PaintAreaView.getPaintViewWidth();

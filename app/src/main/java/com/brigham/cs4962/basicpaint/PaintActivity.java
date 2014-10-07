@@ -12,10 +12,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +25,8 @@ import java.util.List;
 
 public class PaintActivity extends BaseActivity {
 
-    private static final String FILE_PATH = "draw_elements.txt";
+    private static final String FILE_NAME = "draw_elements.txt";
+
     private final String TAG = "Paint Activity";
     private PaintAreaView m_areaView;
 
@@ -46,7 +45,8 @@ public class PaintActivity extends BaseActivity {
     }
 
     private boolean clearPaintView() {
-        File f = new File(FILE_PATH);
+        String dir = getFilesDir().getAbsolutePath();
+        File f = new File(dir, FILE_NAME);
         return f.delete();
     }
 
@@ -58,37 +58,41 @@ public class PaintActivity extends BaseActivity {
     }
 
     private void restoreData() {
-        try {
 
+        try {
             Intent intent = getIntent();
             boolean clear = intent.getBooleanExtra("clear", false);
+
             if(clear) {
-                if(clearPaintView()) {
- //                   return;
+                clearPaintView();
+                intent.removeExtra("clear");
+            } else {
+                FileInputStream fis = openFileInput(FILE_NAME);
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader bufferedReader = new BufferedReader(isr);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
                 }
+
+                String json = sb.toString();
+                Gson gson = new Gson();
+
+                Type listOfDrawElement = new TypeToken<List<DrawElement>>() {
+                }.getType();
+                ArrayList<DrawElement> drawElements = gson.fromJson(json, listOfDrawElement);
+                m_areaView.setDrawElements(drawElements);
             }
-            FileInputStream fis = openFileInput(FILE_PATH);
-            InputStreamReader isr = new InputStreamReader(fis);
-            BufferedReader bufferedReader = new BufferedReader(isr);
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-
-            String json = sb.toString();
-            Gson gson = new Gson();
-
-            Type listOfDrawElement = new TypeToken<List<DrawElement>>(){}.getType();
-            ArrayList<DrawElement> drawElements = gson.fromJson(json, listOfDrawElement);
-            m_areaView.setDrawElements(drawElements);
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            int c = settings.getInt("strokeColor", Color.BLACK);
-            m_areaView.setStrokeColor(c);
-            Drawable drawable = getApplicationContext().getResources().getDrawable(R.drawable.ic_mode_palette_button);
-            drawable.setColorFilter(new PorterDuffColorFilter(c, PorterDuff.Mode.MULTIPLY));
         } catch(Exception ex) {
+            Log.i(TAG, ex.getMessage());
+        } finally {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            int color = settings.getInt("strokeColor", Color.BLACK);
+
+            Drawable drawable = getApplicationContext().getResources().getDrawable(R.drawable.ic_mode_palette_button);
+            drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
+            m_areaView.setStrokeColor(color);
         }
     }
 
@@ -109,18 +113,11 @@ public class PaintActivity extends BaseActivity {
         FileOutputStream outputStream;
 
         try {
-            outputStream = openFileOutput(FILE_PATH, Context.MODE_PRIVATE);
+            outputStream = openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             outputStream.write(str.toString().getBytes());
             outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.i(TAG, "onNewIntent");
-
     }
 }

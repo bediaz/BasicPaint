@@ -144,8 +144,6 @@ public class PaletteView extends ViewGroup {
                 if (m_OnColorChangedListener != null) {
                     int c = ((PaintView) v).getColor();
                     m_OnColorChangedListener.onColorChanged(c);
-//                    Drawable drawable = appContext.getResources().getDrawable(R.drawable.ic_mode_palette_button);
-//                    drawable.setColorFilter(new PorterDuffColorFilter(c, PorterDuff.Mode.ADD));
                 }
                 v.invalidate();
             }

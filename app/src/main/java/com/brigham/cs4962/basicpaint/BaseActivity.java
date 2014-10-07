@@ -12,7 +12,7 @@ import android.view.MenuItem;
 public class BaseActivity extends Activity {
 
     private final String TAG = "Base Activity";
-  //  private Menu menu;
+    private Menu menu;
     private boolean play = false; // flase = pause, true = play
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +29,7 @@ public class BaseActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.paint_menu, menu);
+        this.menu = menu;
         Bundle bundle = getIntent().getExtras();
 
         if(bundle != null) {
@@ -40,6 +41,14 @@ public class BaseActivity extends Activity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    public void setPlay_PauseButton(boolean play_pause) {
+
+        if(menu == null) {
+            return;
+        }
+        play = !play;
+        menu.findItem(R.id.pause_play_menu_button).setIcon(play ? R.drawable.ic_pause_button : R.drawable.ic_play_button);
+    }
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
@@ -73,17 +82,16 @@ public class BaseActivity extends Activity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.slide_in_left | android.R.anim.fade_in, android.R.anim.fade_out);
+                overridePendingTransition(0, 0);//android.R.anim.slide_in_left | android.R.anim.fade_in, android.R.anim.fade_out);
                 return true;
             }
             case R.id.delete_menu_button: {
-                m_CurrentMenu = CurrentMenu.Create;
-                Intent intent = new Intent(this, PaintActivity.class);
+                m_CurrentMenu = CurrentMenu.Watch;
+                Intent intent = getIntent();
+                finish();
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("clear", true);
                 intent.putExtras(bundle);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
                 return true;
@@ -123,7 +131,6 @@ public class BaseActivity extends Activity {
             finish();
             Bundle bundle = new Bundle();
             bundle.putBoolean("Play", play);
-
             intent.putExtras(bundle);
             startActivity(intent);
             overridePendingTransition(0, 0);
