@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">BasicPaint</string>
-    <string name="title_activity_base">Paint</string>
-    <string name="title_activity_watch">Movie mode</string>
-    <string name="title_activity_palette">Palette</string>
-
+	<string name="app_name">BasicPaint</string>
+	<string name="title_activity_base">Paint</string>
+	<string name="title_activity_watch">Movie mode</string>
+	<string name="title_activity_palette">Palette</string>
+	<string name="delete">Delete</string>
+	<string name="watch">Watch</string>
+	<string name="palette">Palette</string>
+	<string name="pause_play">Pause/Play</string>
+	<string name="create">Create</string>
 </resources>

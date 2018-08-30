@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- create menu group -->
-    <group android:id="@+id/group_watch_menu">
-        <item android:id="@+id/delete_menu_button"
-            android:icon="@drawable/ic_delete_button"
-            android:showAsAction="ifRoom"
-            android:title="Delete"
-            />
-        <item android:id="@+id/watch_menu_button"
-            android:icon="@drawable/ic_mode_watch_button"
-            android:showAsAction="ifRoom"
-            android:title="Watch"
-            />
-        <item android:id="@+id/palette_menu_button"
-            android:icon="@drawable/ic_mode_palette_button"
-            android:showAsAction="ifRoom"
-            android:title="Palette"
-            />
-    </group>
+	<!-- create menu group -->
+	<group android:id="@+id/group_watch_menu">
+		<item
+			android:id="@+id/delete_menu_button"
+			android:icon="@drawable/ic_delete_button"
+			android:showAsAction="ifRoom"
+			android:title="@string/delete" />
+		<item
+			android:id="@+id/watch_menu_button"
+			android:icon="@drawable/ic_mode_watch_button"
+			android:showAsAction="ifRoom"
+			android:title="@string/watch" />
+		<item
+			android:id="@+id/palette_menu_button"
+			android:icon="@drawable/ic_mode_palette_button"
+			android:showAsAction="ifRoom"
+			android:title="@string/palette" />
+	</group>
 
-    <!-- watch menu group -->
-    <group android:id="@+id/group_create_menu">
-        <item android:id="@+id/create_menu_button"
-            android:showAsAction="ifRoom"
-            android:icon="@drawable/ic_mode_create_button"
-            android:title="Create"
-            />
-        <item android:id="@+id/pause_play_menu_button"
-            android:showAsAction="ifRoom"
-            android:icon="@drawable/ic_play_button"
-            android:title="Pause/Play"
-            />
-    </group>
+	<!-- watch menu group -->
+	<group android:id="@+id/group_create_menu">
+		<item
+			android:id="@+id/create_menu_button"
+			android:icon="@drawable/ic_mode_create_button"
+			android:showAsAction="ifRoom"
+			android:title="@string/create" />
+		<item
+			android:id="@+id/pause_play_menu_button"
+			android:icon="@drawable/ic_play_button"
+			android:showAsAction="ifRoom"
+			android:title="@string/pause_play" />
+	</group>
 
-    <!-- watch menu group -->
-    <group android:id="@+id/group_palette_menu">
-        <item android:id="@+id/palette_mode"
-            android:showAsAction="ifRoom"
-            android:icon="@drawable/ic_mode_create_button"
-            android:title="Create"
-            />
-    </group>
+	<!-- watch menu group -->
+	<group android:id="@+id/group_palette_menu">
+		<item
+			android:id="@+id/palette_mode"
+			android:icon="@drawable/ic_mode_create_button"
+			android:showAsAction="ifRoom"
+			android:title="@string/create" />
+	</group>
 
 
 </menu>
